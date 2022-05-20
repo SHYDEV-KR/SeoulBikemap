@@ -33,19 +33,14 @@ function paintStations(event, maxD, target) {
         new kakao.maps.Size(25, 40.5),
     );
 
-
-    let clusterer = new kakao.maps.MarkerClusterer({
-        map: map, // 마커들을 클러스터로 관리하고 표시할 지도 객체 
-        averageCenter: true, // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정 
-        minLevel: 5 // 클러스터 할 최소 지도 레벨 
-    });
-
-
     fetch('/seoul_public_bike.json')
         .then(response => {
             return response.json();
         })
         .then(publicBike => {
+            station_markers.forEach(m => m.setMap(null));
+            station_markers = [];
+            console.log(station_markers);
             for (let i = 0; i < Object.keys(publicBike.data).length; i++) {
                 let D = getDistance([target.lat, target.lng], [publicBike.data[i].lat, publicBike.data[i].lng])
                 
@@ -60,7 +55,6 @@ function paintStations(event, maxD, target) {
             if (Object.keys(station_markers).length == 0) {
                 event.path[1].childNodes[3].innerText = `근방 1km에 따릉이가 없습니다.`;
             }
-            clusterer.addMarkers(station_markers);
         })
 }
 
