@@ -5,20 +5,29 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
     <form id="fromForm">
         <input type="text" required placeholder="출발지">
         <input type="submit" value="검색">
     </form>
+    <div id="stations__from" class="hidden">
+        <button id="paintStationsBtn__from">출발지 근처 따릉이 찾기</button>
+        <div id="stationNoneMsg__from"></div>
+    </div>
     <form id="toForm">
         <input type="text" required placeholder="도착지">
         <input type="submit" value="검색">
     </form>
+    <div id="stations__to" class="hidden">
+        <button id="paintStationsBtn__to">도착지 근처 따릉이 찾기</button>
+        <div id="stationNoneMsg__to"></div>
+    </div>
     <div id="searchResults"></div>
 
     <div id="map" style="width:400px;height:320px;"></div>
-    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=a41baaef1f748623b38f9b44baa8d69a&libraries=services"></script>
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=a41baaef1f748623b38f9b44baa8d69a&libraries=services,clusterer"></script>
     <script>
         let container = document.getElementById('map'); //지도를 담을 영역의 DOM 레퍼런스
         let options = { //지도를 생성할 때 필요한 기본 옵션
@@ -27,6 +36,7 @@
         };
         let map = new kakao.maps.Map(container, options); //지도 생성 및 객체 리턴
     </script>
-    <script src="/saveSearchData.js"></script>
+    <script src="/js/saveSearchData.js"></script>
+    <script src="/js/findStations.js"></script>
 </body>
 </html>

@@ -4,35 +4,20 @@ const fromInput = document.querySelector("#fromForm > input");
 const toInput = document.querySelector("#toForm > input");
 const searchResults = document.querySelector("#searchResults");
 
+const stations__from = document.querySelector("#stations__from");
+const stations__to = document.querySelector("#stations__to");
+
 let places = new kakao.maps.services.Places();
 
-let fromToXY = {
-    "from": {
-        "name" : null,
-        "id" : null,
-        "x": null,
-        "y": null,
-    },
-    "to": {
-        "name" : null,
-        "id" : null,
-        "x": null,
-        "y": null,
-    }
-}
-
-function saveLocations(type) {
-    if (type == "from") localStorage.setItem("from", JSON.stringify(fromToXY.from));
-    else if (type == "to") localStorage.setItem("to", JSON.stringify(fromToXY.to));
-}
+let fromToXY = {};
 
 let showPlaces = function (result, status, type) {
     if (status === kakao.maps.services.Status.OK) {
         for (i = 0; i < Object.keys(result).length; i++) {
             let placeName = result[i].place_name;
             let placeId = result[i].id;
-            let x = result[i].x;
-            let y = result[i].y;
+            let lng = result[i].x;
+            let lat = result[i].y;
             paintSearchResults(placeName, placeId);
             document.querySelector(`.result-${placeId}`).addEventListener('click', () => {
                 searchResults.innerHTML = '';
@@ -41,20 +26,43 @@ let showPlaces = function (result, status, type) {
                     fromInput.value = `${placeName}`;
                     fromToXY.from.name = placeName;
                     fromToXY.from.id = placeId;
-                    fromToXY.from.x = x;
-                    fromToXY.from.y = y;
+                    fromToXY.from.lng = lng;
+                    fromToXY.from.lat = lat;
+                    stations__from.classList.remove('hidden');
+                    if (fromToXY.from.marker) {
+                        fromToXY.from.marker.setMap(null);
+                        fromToXY.from.marker = null;
+                    }
+                    paintMarker(lat, lng, "from");
+                    localStorage.setItem("from", JSON.stringify({
+                        name: placeName,
+                        lat: lat,
+                        lng: lng,
+                        id: placeId,
+                    }));
                 } else {
                     toInput.value = `${placeName}`;
                     fromToXY.to.name = placeName;
                     fromToXY.to.id = placeId;
-                    fromToXY.to.x = x;
-                    fromToXY.to.y = y;
+                    fromToXY.to.lng = lng;
+                    fromToXY.to.lat = lat;
+                    stations__to.classList.remove('hidden');
+                    if (fromToXY.to.marker) {
+                        fromToXY.to.marker.setMap(null);
+                        fromToXY.to.marker = null;
+                    }
+                    paintMarker(lat, lng, "to");
+                    localStorage.setItem("to", JSON.stringify({
+                        name: placeName,
+                        lat: lat,
+                        lng: lng,
+                        id: placeId,
+                    }));
                 }
-                saveLocations(type);
             }
             );
         }
-        saveLocations();
+        
     } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
         searchResults.innerText = "검색결과가 없습니다."
     } else {
@@ -83,6 +91,22 @@ function paintSearchResults(placename, id) {
     searchResults.append(place);
 }
 
+function paintMarker(lat, lng, type) {
+    if (type == "from") {
+        fromToXY.from.marker =
+            new kakao.maps.Marker({
+            map: map,
+            position: new kakao.maps.LatLng(lat, lng)
+            });
+    } else {
+        fromToXY.to.marker =
+            new kakao.maps.Marker({
+            map: map,
+            position: new kakao.maps.LatLng(lat, lng)
+            });
+    }
+}
+
 
 fromForm.addEventListener("submit", (event) =>
     handleInput(event, "from"));
@@ -95,13 +119,19 @@ const savedTo = localStorage.getItem("to");
 if (savedFrom !== null) {
     fromToXY.from = JSON.parse(savedFrom);
     fromInput.value = `${fromToXY.from.name}`;
+    stations__from.classList.remove('hidden');
+    paintMarker(fromToXY.from.lat, fromToXY.from.lng, "from");
 } else {
     fromInput.value = ``;
+    stations__from.classList.add('hidden');
 }
 
 if (savedTo !== null) {
     fromToXY.to = JSON.parse(savedTo);
     toInput.value = `${fromToXY.to.name}`;
+    stations__to.classList.remove('hidden');
+    paintMarker(fromToXY.to.lat, fromToXY.to.lng, "to");
 } else {
     toInput.value = ``;
+    stations__to.classList.add('hidden');
 }
